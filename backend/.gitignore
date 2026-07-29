@@ -1,0 +1,53 @@
+# Virtual Environment
+venv/
+my_env/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Environment variables
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Mypy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Logs
+*.log
+
+# SQLite
+*.sqlite3
+*.db
+
+# Alembic (optional)
+alembic/versions/*.pyc
+
+# Uploaded files (if your app stores uploads)
+uploads/
+
+# Python cache
+.python-version
