@@ -36,10 +36,33 @@ async def get_by_id(id:int):
         else:
             return "product not found"
 
-@app.post("/product",status_code=status.HTTP_201_CREATED,summary="product creation",tags=["products"])
-async def create_item(product:Product):
+@app.post("/product",status_code=status.HTTP_201_CREATED,summary="add product")
+async def add(product:Product):
     try:   
         products.append(product)
         return "created successfully"
     except:
         return "error happened"
+
+@app.put("/product/{id}",status_code=status.HTTP_200_OK,summary="Update Product")
+async def update_product(id: int, updated_product: Product):
+    for index, product in enumerate(products):
+        if product.id == id:
+            updated_product.id = id
+            products[index] = updated_product
+            return updated_product
+        
+    return {
+        "message": f"No product found with id {id}"
+    }
+
+@app.delete("/product/{id}",status_code=status.HTTP_200_OK , summary = "delete product")
+async def delete_product(id:int):
+    try:
+        for i in range(len(products)):
+            if products[i].id == id:
+                products.remove(products[i])
+        return "product deleted successfully"
+    except:
+        return { "message": f"No product found with id {id}"}
+
