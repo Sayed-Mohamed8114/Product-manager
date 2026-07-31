@@ -73,13 +73,15 @@ async def get_by_id(id:int,db:Session = Depends(get_db)):
         return "No product with this id"
 
 @app.post("/product",status_code=status.HTTP_201_CREATED,summary="add product")
-async def add(product:Product):
+async def add(product:Product,db:Session = Depends(get_db)):
     try:   
-        products.append(product)
+        db.add(DB.Product(**product.model_dump()))
+        db.commit()
         return "created successfully"
     except:
-        return "error happened"
-    
+        raise HTTPException(
+            status_code=404 , detail = f"Cannot add in this moment"
+        )
 
 @app.put("/product/{id}",status_code=status.HTTP_200_OK,summary="Update Product")
 async def update_product(id: int, updated_product: Product):
