@@ -84,16 +84,19 @@ async def add(product:Product,db:Session = Depends(get_db)):
         )
 
 @app.put("/product/{id}",status_code=status.HTTP_200_OK,summary="Update Product")
-async def update_product(id: int, updated_product: Product):
-    for index, product in enumerate(products):
-        if product.id == id:
-            updated_product.id = id
-            products[index] = updated_product
-            return updated_product
-        
-    return {
-        "message": f"No product found with id {id}"
-    }
+async def update_product(id: int, updated_product: Product, db:Session = Depends(get_db)):
+    db_product = db.query(DB.Product).filter(DB.Product.id==id).first()
+    if db_product:
+        db_product.name = updated_product.name
+        db_product.description = updated_product.description
+        db_product.price = updated_product.price 
+        db_product.quantity = updated_product.quantity
+        db.commit()
+        return "updated successfully"
+    else:    
+        return {
+            "message": f"No product found with id {id}"
+        }
 
 @app.delete("/product/{id}",status_code=status.HTTP_200_OK , summary = "delete product")
 async def delete_product(id:int,db:Session = Depends(get_db)):
