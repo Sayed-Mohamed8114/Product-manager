@@ -1,7 +1,9 @@
-from fastapi import FastAPI,status
+from fastapi import FastAPI,status,HTTPException,Depends
 from models.products_model import Product
 from database.database import session_local , engine
 import models.schema.db_product_shema as DB
+from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 DB.Base.metadata.create_all(bind=engine)
 
@@ -36,6 +38,14 @@ products = [
         )
 ]
 
+# make the session one time and also try it with yield to pause until the db is return what we need then we will close it with finally 
+def get_db():
+    db =session_local()
+    try:
+        yield db 
+    finally:    
+        db.close()
+
 # some dummy data for the show in the project 
 def init_db():
     db = session_local()
@@ -46,21 +56,21 @@ def init_db():
             # now we add this as a dump to make a dict to us also we need to make unpacking with **
             db.add(DB.Product(**product.model_dump()))
         db.commit() # to commit the changes in the db 
-
 init_db()
 
 @app.get("/get_all_products")
-async def get_all_products():
-    db = session_local()
-    return products
+async def get_all_products(db:Session = Depends(get_db)):
+    db_Products = db.query(DB.Product).all()
+    return db_Products
 
 @app.get("/Product/{id}")
-async def get_by_id(id:int):
-    for product in products:
-        if product.id == id:
-            return product 
-        else:
-            return "product not found"
+async def get_by_id(id:int,db:Session = Depends(get_db)):
+    db_product = db.query(DB.Product).filter(DB.Product.id==id).first()
+    try :
+        if db_product:
+            return db_product 
+    except:
+        return "No product with this id"
 
 @app.post("/product",status_code=status.HTTP_201_CREATED,summary="add product")
 async def add(product:Product):
@@ -69,6 +79,7 @@ async def add(product:Product):
         return "created successfully"
     except:
         return "error happened"
+    
 
 @app.put("/product/{id}",status_code=status.HTTP_200_OK,summary="Update Product")
 async def update_product(id: int, updated_product: Product):
@@ -83,12 +94,17 @@ async def update_product(id: int, updated_product: Product):
     }
 
 @app.delete("/product/{id}",status_code=status.HTTP_200_OK , summary = "delete product")
-async def delete_product(id:int):
-    try:
-        for i in range(len(products)):
-            if products[i].id == id:
-                products.remove(products[i])
-        return "product deleted successfully"
-    except:
-        return { "message": f"No product found with id {id}"}
+async def delete_product(id:int,db:Session = Depends(get_db)):
+    db_product = db.query(DB.Product).filter(DB.Product.id==id).first()
+    if db_product is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No product found with id {id}"
+        )
+    
+    db.delete(db_product)
+    db.commit()
+    return {
+        "message": "Product deleted successfully"
+    }
 
