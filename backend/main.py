@@ -1,14 +1,20 @@
 from fastapi import FastAPI,status,HTTPException,Depends
+from fastapi.middleware.cors import CORSMiddleware
 from models.products_model import Product
 from database.database import session_local , engine
 import models.schema.db_product_shema as DB
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"]
+)
+
+
 
 DB.Base.metadata.create_all(bind=engine)
 
-
-app = FastAPI()
 
 @app.get("/") 
 async def greet(name):
