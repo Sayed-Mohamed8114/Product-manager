@@ -11,14 +11,7 @@ app.add_middleware(
     allow_origins=["http://localhost:5173"]
 )
 
-
-
 DB.Base.metadata.create_all(bind=engine)
-
-
-@app.get("/") 
-async def greet(name):
-    return f"hello {name} from the first app "
 
 products = [
     Product(
@@ -56,7 +49,7 @@ def get_db():
 def init_db():
     db = session_local()
     # now we want it to only run one time in the beginning of the project not every time we make it 
-    count = db.query(DB.Product).count
+    count = db.query(DB.Product).count()
     if count ==0 :
         for product in products:
             # now we add this as a dump to make a dict to us also we need to make unpacking with **
@@ -69,7 +62,7 @@ async def get_all_products(db:Session = Depends(get_db)):
     db_Products = db.query(DB.Product).all()
     return db_Products
 
-@app.get("/Product/{id}")
+@app.get("/product/{id}")
 async def get_by_id(id:int,db:Session = Depends(get_db)):
     db_product = db.query(DB.Product).filter(DB.Product.id==id).first()
     try :
