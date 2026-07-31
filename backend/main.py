@@ -1,5 +1,10 @@
 from fastapi import FastAPI,status
 from models.products_model import Product
+from database.database import session_local , engine
+import models.schema.db_product_shema as DB
+
+DB.Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 
@@ -21,11 +26,32 @@ products = [
         description="Modern Samsung Phone",
         price=200.50,
         quantity=10
-    )
+    ),
+    Product(
+            id=3,
+            name="Note book",
+            description="200 page note book",
+            price=20,
+            quantity=15
+        )
 ]
+
+# some dummy data for the show in the project 
+def init_db():
+    db = session_local()
+    # now we want it to only run one time in the beginning of the project not every time we make it 
+    count = db.query(DB.Product).count
+    if count ==0 :
+        for product in products:
+            # now we add this as a dump to make a dict to us also we need to make unpacking with **
+            db.add(DB.Product(**product.model_dump()))
+        db.commit() # to commit the changes in the db 
+
+init_db()
 
 @app.get("/get_all_products")
 async def get_all_products():
+    db = session_local()
     return products
 
 @app.get("/Product/{id}")
