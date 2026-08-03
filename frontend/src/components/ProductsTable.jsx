@@ -1,20 +1,16 @@
-import { useEffect, useState } from "react";
-import { getAllProducts } from "../services/products";
+import { deleteProduct } from "../services/products";
 
-export default function ProductsTable() {
-  const [products, setProducts] = useState([]);
-  const fetchProdcuts = async () => {
+export default function ProductsTable({ products, onProductDeleted }) {
+  const handleDelete = async (id) => {
     try {
-      const data = await getAllProducts();
-      setProducts(data);
+      await deleteProduct(id);
+      await onProductDeleted();
+      alert("deleted successfully");
     } catch (error) {
-      console.error(error);
+      console.log(error);
+      alert("something went wrong");
     }
   };
-
-  useEffect(() => {
-    fetchProdcuts();
-  }, []);
   const table_head_style = `text-center text-slate-200 font-bold text-lg w-auto px-2 py-2 cursor-pointer hover:underline hover:text-slate-900 duration-700 transition `;
   const table_row_style = `text-center text-slate-100 font-extrabold text-sm px-3 py-1`;
   return (
@@ -47,7 +43,10 @@ export default function ProductsTable() {
               </button>
             </td>
             <td className="text-center px-2 py-1 ">
-              <button className="bg-red-700 rounded-lg p-1 cursor-pointer w-[70%] text-white hover:text-green-100 hover:bg-red-900 transition duration-700">
+              <button
+                onClick={() => handleDelete(product.id)}
+                className="bg-red-700 rounded-lg p-1 cursor-pointer w-[70%] text-white hover:text-green-100 hover:bg-red-900 transition duration-700"
+              >
                 Delete
               </button>
             </td>
