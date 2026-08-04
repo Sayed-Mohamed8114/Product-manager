@@ -1,6 +1,6 @@
 import { deleteProduct } from "../services/products";
 
-export default function ProductsTable({ products, onProductDeleted }) {
+export default function ProductsTable({ products, onProductDeleted , onEdit}) {
   const handleDelete = async (id) => {
     try {
       await deleteProduct(id);
@@ -38,7 +38,9 @@ export default function ProductsTable({ products, onProductDeleted }) {
             <td className={table_row_style}>${product.price}</td>
             <td className={table_row_style}>{product.quantity}</td>
             <td className="text-center px-2 py-1 ">
-              <button className="bg-green-600 rounded-lg p-1 cursor-pointer w-[70%] text-white hover:text-green-100 hover:bg-green-900 transition duration-700">
+              <button
+              onClick={()=>{onEdit(product)}}
+               className="bg-green-600 rounded-lg p-1 cursor-pointer w-[70%] text-white hover:text-green-100 hover:bg-green-900 transition duration-700">
                 Edit
               </button>
             </td>
